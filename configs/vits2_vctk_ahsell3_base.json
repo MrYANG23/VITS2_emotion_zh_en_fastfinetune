@@ -59,7 +59,7 @@
       "use_sdp": false,
       "gin_channels": 256,
       "use_emo": true,
-      "usr_trained_emb": false,
+      "use_emb": true,
       "use_avg_speaker_emb": false,
       "use_per_speaker_emb": true,
       "usr_mix_train": false

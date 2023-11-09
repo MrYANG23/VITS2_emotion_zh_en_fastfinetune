@@ -354,8 +354,10 @@ class TextEncoder(nn.Module):
         self.p_dropout = p_dropout
         self.gin_channels = gin_channels
         self.emb = nn.Embedding(n_vocab, hidden_channels)
+        nn.init.normal_(self.emb.weight, 0.0, hidden_channels ** -0.5)
         self.emo_proj = nn.Linear(1024, hidden_channels)
-        nn.init.normal_(self.emb.weight, 0.0, hidden_channels**-0.5)
+        self.language_emb = nn.Embedding(num_languages, hidden_channels)
+        nn.init.normal_(self.language_emb.weight, 0.0, hidden_channels ** -0.5)
 
         self.encoder = attentions.Encoder(
             hidden_channels,
@@ -368,9 +370,9 @@ class TextEncoder(nn.Module):
         )
         self.proj = nn.Conv1d(hidden_channels, out_channels * 2, 1)
 
-    def forward(self, x, x_lengths, emo,g=None):
+    def forward(self, x, x_lengths, language,emo,g=None):
         x = self.emb(x) * math.sqrt(self.hidden_channels)  # [b, t, h]
-        x=x+self.emo_proj(emo.unsqueeze(1))
+        x=x+self.emo_proj(emo.unsqueeze(1))+self.language_emb(language)
         x = torch.transpose(x, 1, -1)  # [b, h, t]
         x_mask = torch.unsqueeze(commons.sequence_mask(x_lengths, x.size(2)), 1).to(
             x.dtype
@@ -1171,6 +1173,12 @@ class SynthesizerTrn(nn.Module):
             assert (
                 self.transformer_flow_type in AVAILABLE_FLOW_TYPES
             ), f"transformer_flow_type must be one of {AVAILABLE_FLOW_TYPES}"
+
+        self.use_emo=kwargs.get("use_emo", False)
+        self.use_emb=kwargs.get('use_emb',False)
+        self.use_trained_emb=kwargs.get("use_trained_emb",False)
+
+
         self.use_sdp = use_sdp
         # self.use_duration_discriminator = kwargs.get("use_duration_discriminator", False)
         self.use_noise_scaled_mas = kwargs.get("use_noise_scaled_mas", False)
@@ -1178,6 +1186,10 @@ class SynthesizerTrn(nn.Module):
         self.noise_scale_delta = kwargs.get("noise_scale_delta", 2e-6)
 
         self.current_mas_noise_scale = self.mas_noise_scale_initial
+
+
+
+
         if self.use_spk_conditioned_encoder and gin_channels > 0:
             self.enc_gin_channels = gin_channels
         else:
@@ -1237,13 +1249,17 @@ class SynthesizerTrn(nn.Module):
         if n_speakers > 1:
             self.emb_g = nn.Embedding(n_speakers, gin_channels)
 
-    def forward(self, x, x_lengths, y, y_lengths, sid=None):
-        if self.n_speakers > 0:
+    def forward(self, x, x_lengths, y, y_lengths, language,emo,emb,sid=None):
+
+
+        if self.n_speakers>0 and self.use_emb==False:
+
+        # if self.n_speakers > 0:
             g = self.emb_g(sid).unsqueeze(-1)  # [b, h, 1]
         else:
-            g = None
+            g = emb
 
-        x, m_p, logs_p, x_mask = self.enc_p(x, x_lengths, g=g)
+        x, m_p, logs_p, x_mask = self.enc_p(x, x_lengths, language,emo,g=g)
         z, m_q, logs_q, y_mask = self.enc_q(y, y_lengths, g=g)
         z_p = self.flow(z, y_mask, g=g)
 
