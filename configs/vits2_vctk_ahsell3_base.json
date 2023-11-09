@@ -20,6 +20,7 @@
       "use_mel_posterior_encoder": true,
       "training_files":"filelists/vctk_audio_sid_text_train_filelist.txt.cleaned",
       "validation_files":"filelists/vctk_audio_sid_text_val_filelist.txt.cleaned",
+      "mix_train_files": "",
       "text_cleaners":["mix_cleaners"],
       "max_wav_value": 32768.0,
       "sampling_rate": 22050,
@@ -58,7 +59,8 @@
       "use_sdp": false,
       "gin_channels": 256,
       "use_emo": true,
-      "use_avg_speaker_emb": true,
+      "usr_trained_emb": false,
+      "use_avg_speaker_emb": false,
       "use_per_speaker_emb": true,
       "usr_mix_train": false
     }
