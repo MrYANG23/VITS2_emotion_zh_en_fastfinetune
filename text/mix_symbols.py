@@ -124,3 +124,4 @@ mix_symbols=final_list
 UNK_ID = mix_symbols.index("<unk>")
 print(UNK_ID)
 #print('mix_symblols',mix_symbols)
+language_id_map = {"ZH": 0,"EN": 1}

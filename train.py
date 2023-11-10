@@ -27,7 +27,7 @@ from models import (AVAILABLE_DURATION_DISCRIMINATOR_TYPES,
                     AVAILABLE_FLOW_TYPES,
                     DurationDiscriminatorV1, DurationDiscriminatorV2,
                     MultiPeriodDiscriminator, SynthesizerTrn)
-from text.symbols import symbols
+from text.mix_symbols import mix_symbols
 
 torch.backends.cudnn.benchmark = True
 global_step = 0
@@ -192,7 +192,7 @@ def run(rank, n_gpus, hps):
         use_duration_discriminator = False
 
     net_g = SynthesizerTrn(
-        len(symbols),
+        len(mix_symbols),
         posterior_channels,
         hps.train.segment_size // hps.data.hop_length,
         n_speakers=hps.data.n_speakers,

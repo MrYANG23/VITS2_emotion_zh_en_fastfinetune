@@ -63,6 +63,7 @@
       "use_emb": true,
       "use_avg_speaker_emb": false,
       "use_per_speaker_emb": true,
-      "usr_mix_train": false
+      "use_mix_train": false,
+      "use_bidirect_loss": true
     }
   }

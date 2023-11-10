@@ -105,9 +105,11 @@ def english_cleaners3(text):
   text = convert_to_ascii(text)
   text = lowercase(text)
   text = expand_abbreviations(text)
-  phonemes = g2p(text)
-  #print('after en phonemize',phonemes)
+  #phonemes = ["sil"]+g2p(text)
+  phonemes =  g2p(text)
+  #phonemes.append('eos')
   phonemes = collapse_whitespace('#'.join(phonemes))
+
   return phonemes
 
 #

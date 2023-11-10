@@ -117,7 +117,7 @@ class TextAudioSpeakerLoader(torch.utils.data.Dataset):
             audiopath_sid_text[3],
         )
 
-        text = self.get_text(text)
+        text = self.get_text(text,lang)
         spec, wav = self.get_audio(audiopath)
         sid = self.get_sid(sid)
         emo=torch.FloatTensor(np.load(audiopath+"emo.npy"))
@@ -175,11 +175,11 @@ class TextAudioSpeakerLoader(torch.utils.data.Dataset):
             torch.save(spec, spec_filename)
         return spec, audio_norm
 
-    def get_text(self, text):
+    def get_text(self, text,lang):
         if self.cleaned_text:
-            text_norm = cleaned_text_to_sequence_mix(text)
+            text_norm = cleaned_text_to_sequence_mix(text,lang)
         else:
-            text_norm = text_to_sequence_mix(text, self.text_cleaners)
+            text_norm = text_to_sequence_mix(text, self.text_cleaners,lang)
         if self.add_blank:
             text_norm = commons.intersperse(text_norm, 0)
         text_norm = torch.LongTensor(text_norm)

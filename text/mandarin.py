@@ -443,7 +443,7 @@ class MyConverter(NeutralToneWith5Mixin, DefaultConverter):
 
 def load_pinyin_dict():
     my_dict = {}
-    with open("pypinyin-local.dict", "r", encoding='utf-8') as f:
+    with open("text/pypinyin-local.dict", "r", encoding='utf-8') as f:
         content = f.readlines()
         for line in content:
             cuts = line.strip().split()
@@ -504,26 +504,29 @@ def chinese_to_phonemes(text):
 
 
 def chinese_to_phonemes_v2(text):
-
-    phonemes = ["sil"]
+    print('---------in-ch-text',text)
+    #phonemes = ["sil"]
+    phonemes = []
     pinyins = pinyin_parser.pinyin(text, style=Style.TONE3)
-
+    print('pinyins',pinyins)
     new_pinyin = []
     for x in pinyins:
         x = "".join(x)
         new_pinyin.append(x)
     #print('new_pinyin {}'.format(new_pinyin))
     sub_phonemes = get_phoneme4pinyin(new_pinyin)
-   # print('sub_phonemes {}'.format(sub_phonemes))
+    print('sub_phonemes {}'.format(sub_phonemes))
     phonemes.extend(sub_phonemes)
 
     #print(f"phoneme seq: {phonemes}")
-    phonemes.append('eos')
-    return "#".join(phonemes)
+    #phonemes.append('eos')
+    #print('out-ch-phonemes',phonemes)
+    #return "#".join(phonemes)
+    return phonemes
 
 
 
 if __name__ == '__main__':
-    text='【环球网报道】当地时间7月18日，美军士兵特拉维斯·金随团参观位于朝韩分界线板门店的共同警备区时突然越界闯入朝鲜。'
+    text='大家好【环球网报道】当地时间7月18日，美军士兵特拉维斯·金随团参观位于朝韩分界线板门店的共同警备区时突然越界闯入朝鲜。'
     final_phomese=chinese_to_phonemes_v2(text)
     print('final_phomese',final_phomese)

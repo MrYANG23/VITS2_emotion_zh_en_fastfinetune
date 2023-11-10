@@ -1,5 +1,6 @@
 from text import cleaners
 from text.mix_symbols import mix_symbols
+from text import *
 
 
 
@@ -13,12 +14,15 @@ def text_to_sequence_mix(text, cleaner_names):
       List of integers corresponding to the symbols in the text
   '''
   symbol_to_id = {s: i for i, s in enumerate(mix_symbols)}
-  cleaned_text = _clean_text_mix(text, cleaner_names)
+  cleaned_text, language= _clean_text_mix(text, cleaner_names)
   sequence = [symbol_to_id[symbol] for symbol in cleaned_text.split('#') if symbol in symbol_to_id.keys()]
-  return sequence
 
 
-def cleaned_text_to_sequence_mix(cleaned_text):
+  return sequence, language
+
+
+
+def cleaned_text_to_sequence_mix(cleaned_text,language):
     '''Converts a string of text to a sequence of IDs corresponding to the symbols in the text.
       Args:
         text: string to convert to a sequence
@@ -26,8 +30,9 @@ def cleaned_text_to_sequence_mix(cleaned_text):
         List of integers corresponding to the symbols in the text
     '''
     symbol_to_id = {s: i for i, s in enumerate(mix_symbols)}
-    sequence = [symbol_to_id[symbol] for symbol in cleaned_text.split('#') if symbol in symbol_to_id.keys()]
-    return sequence
+    sequence = [symbol_to_id[symbol] for symbol in cleaned_text.split("#") if symbol in symbol_to_id.keys()]
+
+    return sequence,language
 
 
 def _clean_text_mix(text, cleaner_names):

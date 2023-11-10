@@ -1173,9 +1173,11 @@ class SynthesizerTrn(nn.Module):
             assert (
                 self.transformer_flow_type in AVAILABLE_FLOW_TYPES
             ), f"transformer_flow_type must be one of {AVAILABLE_FLOW_TYPES}"
-        ######add emotion and speaker embedding#########
+
+        ######add emotion and speaker bidirect loss embedding#########
         self.use_emo=kwargs.get("use_emo", False)
         self.use_emb=kwargs.get('use_emb',False)
+        self.use_bidirect_loss.get("use_bidirect_loss",False)
         ######add emotion and speaker embedding#########
 
         self.use_trained_emb=kwargs.get("use_trained_emb",False)
@@ -1250,6 +1252,10 @@ class SynthesizerTrn(nn.Module):
 
         if n_speakers > 1 and self.use_emb==False:
             self.emb_g = nn.Embedding(n_speakers, gin_channels)
+        else:
+            self.emb_proj=nn.Linear(512,gin_channels)
+
+
 
     def forward(self, x, x_lengths, y, y_lengths, language,emo,emb,sid=None):
 
@@ -1259,7 +1265,8 @@ class SynthesizerTrn(nn.Module):
 
             g = self.emb_g(sid).unsqueeze(-1)  # [b, h, 1]
         elif self.use_emb:
-            g = emb
+
+            g = self.emb_proj(emb).unsqueeze(-1)
 
         x, m_p, logs_p, x_mask = self.enc_p(x, x_lengths, language,emo,g=g)
         z, m_q, logs_q, y_mask = self.enc_q(y, y_lengths, g=g)
@@ -1314,40 +1321,70 @@ class SynthesizerTrn(nn.Module):
         m_p = torch.matmul(attn.squeeze(1), m_p.transpose(1, 2)).transpose(1, 2)
         logs_p = torch.matmul(attn.squeeze(1), logs_p.transpose(1, 2)).transpose(1, 2)
 
+        if self.use_bidirect_loss:
+            z_q=self.flow(m_p,y_mask,g,reverse=True)
+
+
+
         z_slice, ids_slice = commons.rand_slice_segments(
             z, y_lengths, self.segment_size
         )
+
         o = self.dec(z_slice, g=g)
-        return (
-            o,
-            l_length,
-            attn,
-            ids_slice,
-            x_mask,
-            y_mask,
-            (z, z_p, m_p, logs_p, m_q, logs_q),
-            (x, logw, logw_),
-        )
+
+
+        if self.use_bidirect_loss:
+            return (
+                o,
+                l_length,
+                attn,
+                ids_slice,
+                x_mask,
+                y_mask,
+                (z,z_q, z_p, m_p, logs_p, m_q, logs_q),
+                (x, logw, logw_),
+            )
+        else:
+            return (
+                o,
+                l_length,
+                attn,
+                ids_slice,
+                x_mask,
+                y_mask,
+                (z, z_p, m_p, logs_p, m_q, logs_q),
+                (x, logw, logw_),
+            )
 
     def infer(
         self,
         x,
         x_lengths,
+        language,
+        emo,
+        emb,
         sid=None,
         noise_scale=1,
         length_scale=1,
         noise_scale_w=1.0,
         max_len=None,
     ):
-        if self.n_speakers > 0:
+        if self.n_speakers > 0 and self.use_emb==False:
             g = self.emb_g(sid).unsqueeze(-1)  # [b, h, 1]
-        else:
-            g = None
-        x, m_p, logs_p, x_mask = self.enc_p(x, x_lengths, g=g)
+        elif self.use_emb:
+            g = self.emb_proj(emb).unsqueeze(-1)
+
+        x, m_p, logs_p, x_mask =self.enc_p(x, x_lengths, language,emo,g=g)
+
         if self.use_sdp:
             logw = self.dp(x, x_mask, g=g, reverse=True, noise_scale=noise_scale_w)
         else:
             logw = self.dp(x, x_mask, g=g)
+
+
+
+
+
         w = torch.exp(logw) * x_mask * length_scale
         w_ceil = torch.ceil(w)
         y_lengths = torch.clamp_min(torch.sum(w_ceil, [1, 2]), 1).long()
