@@ -27,17 +27,11 @@ from TTS.tts.models import setup_model
 from TTS.config import load_config
 from TTS.tts.models.vits import *
 
-# MODEL_PATH = '/data/zll/yanghan/TTS-main/model_dir/resample_aishell3/vits_aishell3-April-28-2022_03+54PM-0000000/best_model_285585.pth'
-# CONFIG_PATH = '/data/zll/yanghan/TTS-main/model_dir/resample_aishell3/vits_aishell3-April-28-2022_03+54PM-0000000/new_config.json'
-# #TTS_LANGUAGES = "language_ids.json"
-# TTS_SPEAKERS = "/data/zll/yanghan/TTS-main/model_dir/resample_aishell3/speakers.json"
-
 CONFIG_SE_PATH = "model_dir/config_se.json"
 CHECKPOINT_SE_PATH = "model_dir/model_se.pth.tar"
 
 from TTS.tts.utils.speakers import SpeakerManager
 from pydub import AudioSegment
-#from google.colab import files
 import librosa
 from tqdm import tqdm
 
@@ -45,13 +39,6 @@ from tqdm import tqdm
 USE_CUDA = torch.cuda.is_available()
 
 SE_speaker_manager = SpeakerManager(encoder_model_path=CHECKPOINT_SE_PATH, encoder_config_path=CONFIG_SE_PATH, use_cuda=USE_CUDA)
-#tarfile='/data/zll/yanghan/data/TTS_train_data/aishell_caiyinwen_luopang/caiyingwen/cai_2016_16_126_enhanced.wav'
-#arget_emb = SE_speaker_manager.compute_d_vector_from_clip(tarfile)
-#print('---------------------------------------target_emb.shape',target_emb)
-
-#target_emb = torch.FloatTensor(target_emb).unsqueeze(0)
-#print('---------------------------------------target_emb.shape',target_emb.shape)
-
 
 import librosa
 import soundfile as sf

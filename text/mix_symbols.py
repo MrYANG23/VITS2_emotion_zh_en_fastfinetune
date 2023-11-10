@@ -103,21 +103,24 @@ _finals = [
 symbols =CN_PUNCT+_pause + _initials + [i + j for i in _finals for j in _tones]
 
 
-final_set=set()
-for per_en_symbols in symbols_en:
-    final_set.add(per_en_symbols)
-
-for per_zh_symbols in symbols:
-    final_set.add(per_zh_symbols)
-
+# final_set=set()
+# for per_en_symbols in symbols_en:
+#     final_set.add(per_en_symbols)
+#
+# for per_zh_symbols in symbols:
+#     final_set.add(per_zh_symbols)
+#
 
 
 final_list=symbols_en+symbols
-#print('(final_list):',final_list)
-#print(len(final_list))
-save_symbols=list(set(final_list))
-#print('save_symbols)',save_symbols)
-#print(len(save_symbols))
+# print('(final_list):',final_list)
+# print(len(final_list))
+# save_symbols=list(set(final_list))
+# print('save_symbols)',save_symbols)
+# print(len(save_symbols))
 
-mix_symbols_v2=final_list
+mix_symbols=final_list
 
+UNK_ID = mix_symbols.index("<unk>")
+print(UNK_ID)
+#print('mix_symblols',mix_symbols)

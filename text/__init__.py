@@ -1,20 +1,31 @@
-
 from text import cleaners
-from text.ch_en_mix_symbols_v2 import mix_symbols_v2
+from text.mix_symbols import mix_symbols
 
 
-# _symbol_to_id_mix = {s: i for i, s in enumerate(mix_symbols)}
-# _id_to_symbol_mix = {i: s for i, s in enumerate(mix_symbols)}
 
 
-def cleaned_text_to_sequence_mix_v2(cleaned_text):
+def text_to_sequence_mix(text, cleaner_names):
+  '''Converts a string of text to a sequence of IDs corresponding to the symbols in the text.
+    Args:
+      text: string to convert to a sequence
+      cleaner_names: names of the cleaner functions to run the text through
+    Returns:
+      List of integers corresponding to the symbols in the text
+  '''
+  symbol_to_id = {s: i for i, s in enumerate(mix_symbols)}
+  cleaned_text = _clean_text_mix(text, cleaner_names)
+  sequence = [symbol_to_id[symbol] for symbol in cleaned_text.split('#') if symbol in symbol_to_id.keys()]
+  return sequence
+
+
+def cleaned_text_to_sequence_mix(cleaned_text):
     '''Converts a string of text to a sequence of IDs corresponding to the symbols in the text.
       Args:
         text: string to convert to a sequence
       Returns:
         List of integers corresponding to the symbols in the text
     '''
-    symbol_to_id = {s: i for i, s in enumerate(mix_symbols_v2)}
+    symbol_to_id = {s: i for i, s in enumerate(mix_symbols)}
     sequence = [symbol_to_id[symbol] for symbol in cleaned_text.split('#') if symbol in symbol_to_id.keys()]
     return sequence
 

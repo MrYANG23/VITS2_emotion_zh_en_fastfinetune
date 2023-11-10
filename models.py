@@ -1173,9 +1173,11 @@ class SynthesizerTrn(nn.Module):
             assert (
                 self.transformer_flow_type in AVAILABLE_FLOW_TYPES
             ), f"transformer_flow_type must be one of {AVAILABLE_FLOW_TYPES}"
-
+        ######add emotion and speaker embedding#########
         self.use_emo=kwargs.get("use_emo", False)
         self.use_emb=kwargs.get('use_emb',False)
+        ######add emotion and speaker embedding#########
+
         self.use_trained_emb=kwargs.get("use_trained_emb",False)
 
 
@@ -1246,7 +1248,7 @@ class SynthesizerTrn(nn.Module):
                 hidden_channels, 256, 3, 0.5, gin_channels=gin_channels
             )
 
-        if n_speakers > 1:
+        if n_speakers > 1 and self.use_emb==False:
             self.emb_g = nn.Embedding(n_speakers, gin_channels)
 
     def forward(self, x, x_lengths, y, y_lengths, language,emo,emb,sid=None):
@@ -1254,9 +1256,9 @@ class SynthesizerTrn(nn.Module):
 
         if self.n_speakers>0 and self.use_emb==False:
 
-        # if self.n_speakers > 0:
+
             g = self.emb_g(sid).unsqueeze(-1)  # [b, h, 1]
-        else:
+        elif self.use_emb:
             g = emb
 
         x, m_p, logs_p, x_mask = self.enc_p(x, x_lengths, language,emo,g=g)
